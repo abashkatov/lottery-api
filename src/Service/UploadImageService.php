@@ -57,7 +57,7 @@ class UploadImageService
     private function getFullFileDirPath(Lot $lot): string
     {
         return sprintf(
-            '%s/%s/',
+            '%s/%s',
             $this->imagesDirectory,
             $this->getRelativeDir($lot)
         );
@@ -76,7 +76,7 @@ class UploadImageService
     private function getRelativePath(Image $image): string
     {
         return sprintf(
-            '%s/%s.%s',
+            '%s%s.%s',
             $this->getRelativeDir($image->getLot()),
             $image->getId(),
             $image->getExt()
