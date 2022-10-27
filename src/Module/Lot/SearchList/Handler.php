@@ -35,6 +35,9 @@ class Handler
             $orderBy[$command->getOrder()] = $dest;
         }
         $criteria = [];
+        if ($command->getStatus() !== null) {
+            $criteria['status'] = $command->getStatus();
+        }
         if ($command->getIsMy() === false) {
             return $this->repository->findByOtherUsers(
                 $command->getUserId(),

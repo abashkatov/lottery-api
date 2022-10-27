@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Module\Lot\UpdateLot;
 
 use App\Entity\Lot;
+use App\Enum\LotStatus;
 use App\Exception\InvalidParamsException;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
@@ -30,6 +31,9 @@ class Handler
             ->setPriceStart($command->getPriceStart())
             ->setPriceStep($command->getPriceStep())
             ->setBiddingEnd($command->getBiddingEnd());
+        if ($command->getStatus() !== null) {
+            $lot->setStatus(LotStatus::from($command->getStatus()));
+        }
         return $lot;
     }
 }

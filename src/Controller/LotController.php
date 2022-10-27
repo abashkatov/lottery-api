@@ -58,6 +58,7 @@ class LotController extends AbstractController
             (string)$request->query->get('order') ?: null,
             (string)$request->query->get('dest') ?: null,
             $request->query->get('isMy') ?: null,
+            $request->query->get('status') ?: null,
             $userVkId,
         );
         $lots = $handler->handle($command);

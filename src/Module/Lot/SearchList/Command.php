@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Module\Lot\SearchList;
 
+use App\Enum\LotStatus;
 use Symfony\Component\Validator\Constraints as Assert;
 
 class Command
@@ -21,8 +22,10 @@ class Command
     private ?string $dest;
     private ?bool   $isMy;
     private int     $userId;
+    #[Assert\Choice(choices: LotStatus::STATUSES)]
+    private ?string $status;
 
-    public function __construct(int $page, int $limit, ?string $order, ?string $dest, ?string $isMy, int $userId)
+    public function __construct(int $page, int $limit, ?string $order, ?string $dest, ?string $isMy, ?string $status, int $userId)
     {
         $this->offset = ($page - 1) * $limit;
         $this->limit = $limit;
@@ -32,6 +35,7 @@ class Command
             ? null
             : $isMy === 'true';
         $this->userId = $userId;
+        $this->status = $status;
     }
 
     public function getOffset(): float|int
@@ -62,5 +66,10 @@ class Command
     public function getUserId(): int
     {
         return $this->userId;
+    }
+
+    public function getStatus(): ?string
+    {
+        return $this->status;
     }
 }

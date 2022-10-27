@@ -25,8 +25,7 @@ services:
             - '../src/Kernel.php'
             - '../src/EventListener/'
             - '../src/Exception/'
-
-#            - '../src/Subscriber/'
+            - '../src/Enum/'
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
@@ -37,8 +36,3 @@ services:
     App\Service\UploadImageService:
         arguments:
             $imagesDirectory: '%images_directory%'
-
-#    App\Subscriber\:
-#        resource: '../src/Subscriber/'
-#        tags:
-#            - { name: kernel.event_subscriber }

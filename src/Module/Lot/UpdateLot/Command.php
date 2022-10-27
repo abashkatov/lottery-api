@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Module\Lot\UpdateLot;
 
+use App\Enum\LotStatus;
 use Symfony\Component\Validator\Constraints as Assert;
 
 class Command
@@ -30,6 +31,9 @@ class Command
 
     #[Assert\NotBlank]
     private ?\DateTime $biddingEnd = null;
+
+    #[Assert\Choice(choices: LotStatus::STATUSES)]
+    private ?string $status = null;
 
     public function getTitle(): ?string
     {
@@ -89,5 +93,15 @@ class Command
     public function setBiddingEnd(?\DateTime $biddingEnd): void
     {
         $this->biddingEnd = $biddingEnd;
+    }
+
+    public function getStatus(): ?string
+    {
+        return $this->status;
+    }
+
+    public function setStatus(?string $status): void
+    {
+        $this->status = $status;
     }
 }

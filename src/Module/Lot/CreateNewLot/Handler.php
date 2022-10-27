@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Module\Lot\CreateNewLot;
 
 use App\Entity\Lot;
+use App\Enum\LotStatus;
 use App\Exception\InvalidParamsException;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
@@ -30,6 +31,7 @@ class Handler
             ->setAddress($command->getAddress())
             ->setPriceStart($command->getPriceStart())
             ->setPriceStep($command->getPriceStep())
+            ->setStatus(LotStatus::OPEN)
             ->setBiddingEnd($command->getBiddingEnd());
         return $lot;
     }

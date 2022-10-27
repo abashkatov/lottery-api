@@ -27,12 +27,16 @@ class ExceptionListener
         }
         if ($exception instanceof InvalidParamsException) {
             $messages = [];
-            foreach ($exception->getErrors() as $error) {
-                $messages[] = sprintf(
-                    '%s: %s',
-                    $error->getPropertyPath(),
-                    $error->getMessage()
-                );
+            if ($exception->getErrors() !== null) {
+                foreach ($exception->getErrors() as $error) {
+                    $messages[] = sprintf(
+                        '%s: %s',
+                        $error->getPropertyPath(),
+                        $error->getMessage()
+                    );
+                }
+            } else {
+                $messages[] = $exception->getMessage();
             }
             $response = new JsonResponse([
                 'error' => ['messages' => $messages],

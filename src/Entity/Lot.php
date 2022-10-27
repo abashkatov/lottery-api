@@ -2,6 +2,8 @@
 
 namespace App\Entity;
 
+use App\Enum\LotStatus;
+use App\Exception\InvalidParamsException;
 use App\Repository\LotRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -38,6 +40,9 @@ class Lot
 
     #[ORM\Column(nullable: true)]
     private ?int $authorId = null;
+
+    #[ORM\Column(nullable: true, enumType: LotStatus::class)]
+    private ?LotStatus $status = null;
 
     public function __construct()
     {
@@ -156,6 +161,17 @@ class Lot
     public function setAuthorId(?int $authorId): self
     {
         $this->authorId = $authorId;
+        return $this;
+    }
+
+    public function getStatus(): ?LotStatus
+    {
+        return $this->status;
+    }
+
+    public function setStatus(?LotStatus $status): self
+    {
+        $this->status = $status;
         return $this;
     }
 }

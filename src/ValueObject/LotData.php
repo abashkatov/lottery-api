@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\ValueObject;
 
 use App\Entity\Lot;
+use App\Enum\LotStatus;
 
 class LotData
 {
@@ -14,6 +15,8 @@ class LotData
     private string $address;
     private int $priceStart;
     private int $priceStep;
+    private string $status;
+    private int $authorId;
     private \DateTime $biddingEnd;
     /** @var ImageData[] */
     private array $images;
@@ -30,6 +33,8 @@ class LotData
         $this->priceStep   = $lot->getPriceStep();
         $this->biddingEnd  = $lot->getBiddingEnd();
         $this->images      = $images;
+        $this->status      = $lot->getStatus()?->value ?? LotStatus::OPEN->value;
+        $this->authorId    = $lot->getAuthorId() ?? 0;
     }
 
     public function getId(): int
@@ -73,5 +78,15 @@ class LotData
     public function getImages(): array
     {
         return $this->images;
+    }
+
+    public function getStatus(): string
+    {
+        return $this->status;
+    }
+
+    public function getAuthorId(): int
+    {
+        return $this->authorId;
     }
 }
