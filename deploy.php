@@ -11,7 +11,7 @@ set('allow_anonymous_stats', false);
 set('repository', 'git@github.com:abashkatov/lottery-api.git');
 
 add('shared_files', []);
-add('shared_dirs', []);
+add('shared_dirs', ['public/uploads/images']);
 add('writable_dirs', []);
 
 // Hosts
