@@ -73,7 +73,7 @@ class LotController extends AbstractController
     /**
      * @throws ExceptionInterface
      */
-    #[Route('/lots/{lot<\d+>}', name: 'lots-get-one', methods: 'PATCH')]
+    #[Route('/lots/{lot<\d+>}', name: 'lots-update-one', methods: 'PATCH')]
     public function patchLot(Lot $lot, Request $request, UpdateLotHandler $handler): Response
     {
         /** @var UpdateLotCommand $command */
