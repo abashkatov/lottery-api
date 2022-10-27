@@ -10,3 +10,4 @@
 ###< symfony/framework-bundle ###
 /.idea/dataSources.xml
 /.idea/sshConfigs.xml
+/public/uploads/

@@ -15,13 +15,13 @@ use App\Module\Lot\UpdateLot\Command as UpdateLotCommand;
 use App\Module\Lot\UpdateLot\Handler as UpdateLotHandler;
 use App\Module\Lot\UploadImage\Command as UploadImageCommand;
 use App\Module\Lot\UploadImage\Handler as UploadImageHandler;
-use App\Service\UploadImageService;
 use App\ValueObject\LotData;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
 use Symfony\Component\Serializer\Exception\ExceptionInterface;
@@ -51,11 +51,14 @@ class LotController extends AbstractController
     #[Route('/lots', name: 'lots-list', methods: 'GET')]
     public function getLotsList(Request $request, SearchListHandler $handler): Response
     {
+        $userVkId = (int)$request->headers->get('X-VK-ID');
         $command = new SearchListCommand(
-            (int)$request->query->get('page', 1),
-            (int)$request->query->get('limit', 20),
+            $request->query->getInt('page', 1),
+            $request->query->getInt('limit', 20),
             (string)$request->query->get('order') ?: null,
             (string)$request->query->get('dest') ?: null,
+            $request->query->get('isMy') ?: null,
+            $userVkId,
         );
         $lots = $handler->handle($command);
         $lotDataMapper = $this->lotDataMapper;
@@ -73,9 +76,11 @@ class LotController extends AbstractController
     #[Route('/lots', name: 'lots-create', methods: 'POST')]
     public function createLot(CreateLotHandler $handler, Request $request): Response
     {
+        $userVkId = (int)$request->headers->get('X-VK-ID');
         /** @var CreateLotCommand $command */
         $command = $this->serializer->deserialize($request->getContent(), CreateLotCommand::class, JsonEncoder::FORMAT);
         $lot = $handler->handle($command);
+        $lot->setAuthorId($userVkId);
         $this->em->persist($lot);
         $this->em->flush();
         $lotData = $this->lotDataMapper->buildLotData($lot);
@@ -100,6 +105,10 @@ class LotController extends AbstractController
     #[Route('/lots/{lot<\d+>}', name: 'lots-update-one', methods: 'PATCH')]
     public function patchLot(Lot $lot, Request $request, UpdateLotHandler $handler): Response
     {
+        $userVkId = (int)$request->headers->get('X-VK-ID');
+        if ($lot->getAuthorId() !== $userVkId) {
+            throw new AccessDeniedHttpException('Permissions denied');
+        }
         /** @var UpdateLotCommand $command */
         $command = $this->serializer->deserialize($request->getContent(), UpdateLotCommand::class, JsonEncoder::FORMAT);
         $lot = $handler->handle($lot, $command);
@@ -115,6 +124,10 @@ class LotController extends AbstractController
     #[Route('/lots/{lot<\d+>}/image', name: 'lots-image-upload', methods: ['POST'])]
     public function index(Lot $lot, Request $request, UploadImageHandler $handler, ImageDataMapper $imageDataMapper): Response
     {
+        $userVkId = (int)$request->headers->get('X-VK-ID');
+        if ($lot->getAuthorId() !== $userVkId) {
+            throw new AccessDeniedHttpException('Permissions denied');
+        }
         $file = $request->files->get('image');
         if (!$file instanceof UploadedFile) {
             throw new \InvalidArgumentException('A required file is missing');

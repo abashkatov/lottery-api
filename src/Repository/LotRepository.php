@@ -4,6 +4,7 @@ namespace App\Repository;
 
 use App\Entity\Lot;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\Common\Collections\Criteria;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -39,6 +40,44 @@ class LotRepository extends ServiceEntityRepository
         }
     }
 
+    /**
+     * @return Lot[] Returns an array of Lot objects
+     */
+    public function findByOtherUsers(int $userId, array $criteria, array $orderBy = [], ?int $limit = null, ?int $offset = null): array
+    {
+        $qb = $this->createQueryBuilder('l')
+            ->andWhere('l.authorId != :userId')
+            ->setParameter('userId', $userId);
+        foreach ($criteria as $key => $value) {
+            $qb
+                ->andWhere("l.{$key} = :{$key}")
+                ->setParameter($key, $value);
+        }
+        $isOrdered = false;
+        foreach ($orderBy as $key => $value) {
+            if (is_int($key)) {
+                $field = $value;
+                $dest = null;
+            } else {
+                $field = $key;
+                $dest = $value;
+            }
+            $field = 'l.' . $field;
+            if ($isOrdered) {
+                $qb->addOrderBy($field, $dest);
+            } else {
+                $isOrdered = true;
+                $qb->orderBy($field, $dest);
+            }
+        }
+        if (is_int($limit) && $limit > 0) {
+            $qb->setMaxResults($limit);
+        }
+        if (is_int($offset) && $offset > 0) {
+            $qb->setFirstResult($offset);
+        }
+        return $qb->getQuery()->getResult();
+    }
 //    /**
 //     * @return Lot[] Returns an array of Lot objects
 //     */

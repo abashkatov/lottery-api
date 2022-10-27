@@ -12,20 +12,26 @@ class Command
     private const DEST = ['ASC', 'DESC'];
 
     #[Assert\GreaterThanOrEqual(0)]
-    private int $offset;
+    private int     $offset;
     #[Assert\GreaterThanOrEqual(1)]
-    private int $limit;
+    private int     $limit;
     #[Assert\Choice(choices: self::ORDERS)]
     private ?string $order;
     #[Assert\Choice(choices: self::DEST)]
     private ?string $dest;
+    private ?bool   $isMy;
+    private int     $userId;
 
-    public function __construct(int $page, int $limit, ?string $order, ?string $dest)
+    public function __construct(int $page, int $limit, ?string $order, ?string $dest, ?string $isMy, int $userId)
     {
         $this->offset = ($page - 1) * $limit;
         $this->limit = $limit;
         $this->order = $order;
         $this->dest = $dest;
+        $this->isMy = \is_null($isMy)
+            ? null
+            : $isMy === 'true';
+        $this->userId = $userId;
     }
 
     public function getOffset(): float|int
@@ -46,5 +52,15 @@ class Command
     public function getDest(): ?string
     {
         return $this->dest;
+    }
+
+    public function getIsMy(): ?bool
+    {
+        return $this->isMy;
+    }
+
+    public function getUserId(): int
+    {
+        return $this->userId;
     }
 }

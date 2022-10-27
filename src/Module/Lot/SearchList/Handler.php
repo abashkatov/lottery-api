@@ -34,8 +34,22 @@ class Handler
             $dest = $command->getDest() ?? 'ASC';
             $orderBy[$command->getOrder()] = $dest;
         }
+        $criteria = [];
+        if ($command->getIsMy() === false) {
+            return $this->repository->findByOtherUsers(
+                $command->getUserId(),
+                $criteria,
+                $orderBy,
+                $command->getLimit(),
+                $command->getOffset()
+            );
+        }
+        if ($command->getIsMy() === true) {
+            $criteria['authorId'] = $command->getUserId();
+        }
+
         return $this->repository->findBy(
-            [],
+            $criteria,
             $orderBy,
             $command->getLimit(),
             $command->getOffset()

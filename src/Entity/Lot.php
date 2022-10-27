@@ -36,6 +36,9 @@ class Lot
     #[ORM\OneToMany(mappedBy: 'lot', targetEntity: Image::class, orphanRemoval: true)]
     private Collection $images;
 
+    #[ORM\Column(nullable: true)]
+    private ?int $authorId = null;
+
     public function __construct()
     {
         $this->images = new ArrayCollection();
@@ -142,6 +145,17 @@ class Lot
             }
         }
 
+        return $this;
+    }
+
+    public function getAuthorId(): ?int
+    {
+        return $this->authorId;
+    }
+
+    public function setAuthorId(?int $authorId): self
+    {
+        $this->authorId = $authorId;
         return $this;
     }
 }
