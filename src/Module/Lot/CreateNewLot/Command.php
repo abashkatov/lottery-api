@@ -60,4 +60,34 @@ class Command
     {
         return $this->biddingEnd;
     }
+
+    public function setTitle(?string $title): void
+    {
+        $this->title = $title;
+    }
+
+    public function setDescription(?string $description): void
+    {
+        $this->description = $description;
+    }
+
+    public function setAddress(?string $address): void
+    {
+        $this->address = $address;
+    }
+
+    public function setPriceStart(?int $priceStart): void
+    {
+        $this->priceStart = $priceStart;
+    }
+
+    public function setPriceStep(?int $priceStep): void
+    {
+        $this->priceStep = $priceStep;
+    }
+
+    public function setBiddingEnd(?\DateTime $biddingEnd): void
+    {
+        $this->biddingEnd = $biddingEnd;
+    }
 }
