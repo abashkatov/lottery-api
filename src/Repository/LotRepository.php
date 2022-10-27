@@ -3,8 +3,10 @@
 namespace App\Repository;
 
 use App\Entity\Lot;
+use App\ValueObject\LotCounterData;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Common\Collections\Criteria;
+use Doctrine\DBAL\Exception;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -38,6 +40,18 @@ class LotRepository extends ServiceEntityRepository
         if ($flush) {
             $this->getEntityManager()->flush();
         }
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function getCounters(int $userId): LotCounterData
+    {
+        $sql = 'select count(*) as total, count(*) filter (where author_id=:userId) as my from lot;';
+        $stmt = $this->getEntityManager()->getConnection()->prepare($sql);
+        $result = $stmt->executeQuery(['userId' => $userId]);
+        $data = $result->fetchAssociative();
+        return new LotCounterData($data['total'], $data['my']);
     }
 
     /**

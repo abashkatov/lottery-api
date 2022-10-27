@@ -15,7 +15,9 @@ use App\Module\Lot\UpdateLot\Command as UpdateLotCommand;
 use App\Module\Lot\UpdateLot\Handler as UpdateLotHandler;
 use App\Module\Lot\UploadImage\Command as UploadImageCommand;
 use App\Module\Lot\UploadImage\Handler as UploadImageHandler;
+use App\Repository\LotRepository;
 use App\ValueObject\LotData;
+use Doctrine\DBAL\Exception;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
@@ -43,6 +45,19 @@ class LotController extends AbstractController
         $this->serializer = $serializer;
         $this->em = $em;
         $this->lotDataMapper = $lotDataMapper;
+    }
+
+    /**
+     * @throws ExceptionInterface
+     * @throws Exception
+     */
+    #[Route('/lots/counters', name: 'lots-counters', methods: 'GET')]
+    public function getCounters(Request $request, LotRepository $repository): Response
+    {
+        $userVkId = (int)$request->headers->get('X-VK-ID');
+        $counters = $repository->getCounters($userVkId);
+        $data = $this->serializer->normalize($counters);
+        return $this->json($data);
     }
 
     /**
