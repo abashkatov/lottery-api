@@ -23,9 +23,6 @@ class Lot
     private ?string $address = null;
 
     #[ORM\Column]
-    private ?int $price = null;
-
-    #[ORM\Column]
     private ?int $priceStart = null;
 
     #[ORM\Column]
@@ -75,15 +72,36 @@ class Lot
         return $this;
     }
 
-    public function getPrice(): ?int
+    public function getPriceStart(): ?int
     {
-        return $this->price;
+        return $this->priceStart;
     }
 
-    public function setPrice(int $price): self
+    public function setPriceStart(?int $priceStart): self
     {
-        $this->price = $price;
-
+        $this->priceStart = $priceStart;
         return $this;
     }
+
+    public function getPriceStep(): ?int
+    {
+        return $this->priceStep;
+    }
+
+    public function setPriceStep(?int $priceStep): self
+    {
+        $this->priceStep = $priceStep;
+        return $this;
+    }
+
+    public function getBiddingEnd(): ?\DateTime
+    {
+        return $this->biddingEnd;
+    }
+
+    public function setBiddingEnd(?\DateTime $biddingEnd): self
+    {
+        $this->biddingEnd = $biddingEnd;
+        return $this;
+   }
 }
