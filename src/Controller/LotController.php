@@ -7,6 +7,8 @@ namespace App\Controller;
 use App\Entity\Lot;
 use App\Module\Lot\CreateNewLot\Command as CreateLotCommand;
 use App\Module\Lot\CreateNewLot\Handler as CreateLotHandler;
+use App\Module\Lot\SearchList\Command as SearchListCommand;
+use App\Module\Lot\SearchList\Handler as SearchListHandler;
 use App\Module\Lot\UpdateLot\Command as UpdateLotCommand;
 use App\Module\Lot\UpdateLot\Handler as UpdateLotHandler;
 use App\Repository\LotRepository;
@@ -22,13 +24,11 @@ use Symfony\Component\Serializer\SerializerInterface;
 
 class LotController extends AbstractController
 {
-    private LotRepository          $lotRepository;
     private Serializer             $serializer;
     private EntityManagerInterface $em;
 
-    public function __construct(LotRepository $lotRepository, SerializerInterface $serializer, EntityManagerInterface $em)
+    public function __construct(SerializerInterface $serializer, EntityManagerInterface $em)
     {
-        $this->lotRepository = $lotRepository;
         $this->serializer = $serializer;
         $this->em = $em;
     }
@@ -37,9 +37,15 @@ class LotController extends AbstractController
      * @throws ExceptionInterface
      */
     #[Route('/lots', name: 'lots-list', methods: 'GET')]
-    public function getLotsList(): Response
+    public function getLotsList(Request $request, SearchListHandler $handler): Response
     {
-        $lots = $this->lotRepository->findAll();
+        $command = new SearchListCommand(
+            (int)$request->query->get('page', 1),
+            (int)$request->query->get('limit', 20),
+            (string)$request->query->get('order') ?: null,
+            (string)$request->query->get('dest') ?: null,
+        );
+        $lots = $handler->handle($command);
         $data = $this->serializer->normalize($lots);
         return $this->json($data);
     }

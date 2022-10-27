@@ -21,7 +21,7 @@ class Handler
     {
         $errors = $this->validator->validate($command);
         if (count($errors) > 0) {
-            throw new InvalidParamsException("Invalid registration params", $errors);
+            throw new InvalidParamsException("Invalid lot params", $errors);
         }
         $lot = new Lot();
         $lot
