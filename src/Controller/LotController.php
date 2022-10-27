@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use App\Entity\Lot;
+use App\Mapper\ImageDataMapper;
+use App\Mapper\LotDataMapper;
 use App\Module\Lot\CreateNewLot\Command as CreateLotCommand;
 use App\Module\Lot\CreateNewLot\Handler as CreateLotHandler;
 use App\Module\Lot\SearchList\Command as SearchListCommand;
@@ -14,6 +16,7 @@ use App\Module\Lot\UpdateLot\Handler as UpdateLotHandler;
 use App\Module\Lot\UploadImage\Command as UploadImageCommand;
 use App\Module\Lot\UploadImage\Handler as UploadImageHandler;
 use App\Service\UploadImageService;
+use App\ValueObject\LotData;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
@@ -29,17 +32,17 @@ class LotController extends AbstractController
 {
     private Serializer             $serializer;
     private EntityManagerInterface $em;
-    private UploadImageService     $uploadImageService;
+    private LotDataMapper          $lotDataMapper;
 
     public function __construct(
         SerializerInterface $serializer,
         EntityManagerInterface $em,
-        UploadImageService $uploadImageService,
+        LotDataMapper $lotDataMapper,
     )
     {
         $this->serializer = $serializer;
         $this->em = $em;
-        $this->uploadImageService = $uploadImageService;
+        $this->lotDataMapper = $lotDataMapper;
     }
 
     /**
@@ -55,7 +58,12 @@ class LotController extends AbstractController
             (string)$request->query->get('dest') ?: null,
         );
         $lots = $handler->handle($command);
-        $data = $this->serializer->normalize($lots);
+        $lotDataMapper = $this->lotDataMapper;
+        $lotsData = \array_map(
+            static fn(Lot $lot): LotData => $lotDataMapper->buildLotData($lot),
+            $lots
+        );
+        $data = $this->serializer->normalize($lotsData);
         return $this->json($data);
     }
 
@@ -70,8 +78,8 @@ class LotController extends AbstractController
         $lot = $handler->handle($command);
         $this->em->persist($lot);
         $this->em->flush();
-
-        $data = $this->serializer->normalize($lot);
+        $lotData = $this->lotDataMapper->buildLotData($lot);
+        $data = $this->serializer->normalize($lotData);
         return $this->json($data);
     }
 
@@ -81,7 +89,8 @@ class LotController extends AbstractController
     #[Route('/lots/{lot<\d+>}', name: 'lots-get-one', methods: 'GET')]
     public function getLot(Lot $lot): Response
     {
-        $data = $this->serializer->normalize($lot);
+        $lotData = $this->lotDataMapper->buildLotData($lot);
+        $data = $this->serializer->normalize($lotData);
         return $this->json($data);
     }
 
@@ -95,7 +104,8 @@ class LotController extends AbstractController
         $command = $this->serializer->deserialize($request->getContent(), UpdateLotCommand::class, JsonEncoder::FORMAT);
         $lot = $handler->handle($lot, $command);
         $this->em->flush();
-        $data = $this->serializer->normalize($lot);
+        $lotData = $this->lotDataMapper->buildLotData($lot);
+        $data = $this->serializer->normalize($lotData);
         return $this->json($data);
     }
 
@@ -103,7 +113,7 @@ class LotController extends AbstractController
      * @throws ExceptionInterface
      */
     #[Route('/lots/{lot<\d+>}/image', name: 'lots-image-upload', methods: ['POST'])]
-    public function index(Lot $lot, Request $request, UploadImageHandler $handler): Response
+    public function index(Lot $lot, Request $request, UploadImageHandler $handler, ImageDataMapper $imageDataMapper): Response
     {
         $file = $request->files->get('image');
         if (!$file instanceof UploadedFile) {
@@ -111,7 +121,7 @@ class LotController extends AbstractController
         }
         $command = new UploadImageCommand($file);
         $image = $handler->handle($lot, $command);
-        $imageDto = $this->uploadImageService->buildImageData($image);
+        $imageDto = $imageDataMapper->buildImageData($image);
         $data = $this->serializer->normalize($imageDto);
         return $this->json($data);
     }

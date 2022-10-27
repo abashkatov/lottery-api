@@ -24,15 +24,6 @@ class UploadImageService
         $this->em = $em;
     }
 
-    public function buildImageData(Image $image): ImageData
-    {
-        return new ImageData(
-            $image->getId(),
-            $image->getLot()?->getId() ?? 0,
-            $this->getImageFullUrl($image)
-        );
-    }
-
     public function uploadImage(Lot $lot, Command $command): Image
     {
         $image = new Image();
@@ -53,7 +44,7 @@ class UploadImageService
         return $image->getId() . '.' . $image->getExt();
     }
 
-    private function getImageFullUrl(Image $image): string
+    public function getImageFullUrl(Image $image): string
     {
         return $this->urlHelper->getAbsoluteUrl(
             sprintf(
