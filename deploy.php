@@ -22,4 +22,6 @@ host('lottery-api')
 
 // Hooks
 
+before('deploy:symlink', 'database:migrate');
+
 after('deploy:failed', 'deploy:unlock');
