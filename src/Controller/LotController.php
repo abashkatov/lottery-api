@@ -11,9 +11,12 @@ use App\Module\Lot\SearchList\Command as SearchListCommand;
 use App\Module\Lot\SearchList\Handler as SearchListHandler;
 use App\Module\Lot\UpdateLot\Command as UpdateLotCommand;
 use App\Module\Lot\UpdateLot\Handler as UpdateLotHandler;
-use App\Repository\LotRepository;
+use App\Module\Lot\UploadImage\Command as UploadImageCommand;
+use App\Module\Lot\UploadImage\Handler as UploadImageHandler;
+use App\Service\UploadImageService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -26,11 +29,17 @@ class LotController extends AbstractController
 {
     private Serializer             $serializer;
     private EntityManagerInterface $em;
+    private UploadImageService     $uploadImageService;
 
-    public function __construct(SerializerInterface $serializer, EntityManagerInterface $em)
+    public function __construct(
+        SerializerInterface $serializer,
+        EntityManagerInterface $em,
+        UploadImageService $uploadImageService,
+    )
     {
         $this->serializer = $serializer;
         $this->em = $em;
+        $this->uploadImageService = $uploadImageService;
     }
 
     /**
@@ -87,6 +96,23 @@ class LotController extends AbstractController
         $lot = $handler->handle($lot, $command);
         $this->em->flush();
         $data = $this->serializer->normalize($lot);
+        return $this->json($data);
+    }
+
+    /**
+     * @throws ExceptionInterface
+     */
+    #[Route('/lots/{lot<\d+>}/image', name: 'lots-image-upload', methods: ['POST'])]
+    public function index(Lot $lot, Request $request, UploadImageHandler $handler): Response
+    {
+        $file = $request->files->get('image');
+        if (!$file instanceof UploadedFile) {
+            throw new \InvalidArgumentException('A required file is missing');
+        }
+        $command = new UploadImageCommand($file);
+        $image = $handler->handle($lot, $command);
+        $imageDto = $this->uploadImageService->buildImageData($image);
+        $data = $this->serializer->normalize($imageDto);
         return $this->json($data);
     }
 }
