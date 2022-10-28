@@ -12,7 +12,7 @@ class Command
     private const ALLOWED_FORMATS = ['jpeg', 'jpg', 'png'];
 
     private const FILE_SIZE_MIN_BYTES = 10;
-    private const FILE_SIZE_MAX_BYTES = 100_000;
+    private const FILE_SIZE_MAX_BYTES = 200 * 1024;
 
     private UploadedFile $file;
 
