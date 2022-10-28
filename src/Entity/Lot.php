@@ -41,12 +41,25 @@ class Lot
     #[ORM\Column(nullable: true)]
     private ?int $authorId = null;
 
-    #[ORM\Column(nullable: true, enumType: LotStatus::class)]
+    #[ORM\Column(enumType: LotStatus::class)]
     private ?LotStatus $status = null;
+
+    #[ORM\Column(columnDefinition: "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")]
+    private ?\DateTime $createdAt = null;
+
+    #[ORM\OneToMany(mappedBy: 'lot', targetEntity: Bid::class, orphanRemoval: true)]
+    private Collection $bids;
+
+    #[ORM\Column]
+    private ?int $currentBid = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?int $lastBidder = null;
 
     public function __construct()
     {
         $this->images = new ArrayCollection();
+        $this->bids = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -172,6 +185,69 @@ class Lot
     public function setStatus(?LotStatus $status): self
     {
         $this->status = $status;
+        return $this;
+    }
+
+    public function getCreatedAt(): ?\DateTime
+    {
+        return $this->createdAt;
+    }
+
+    public function setCreatedAt(?\DateTime $createdAt): self
+    {
+        $this->createdAt = $createdAt;
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Bid>
+     */
+    public function getBids(): Collection
+    {
+        return $this->bids;
+    }
+
+    public function addBid(Bid $bid): self
+    {
+        if (!$this->bids->contains($bid)) {
+            $this->bids->add($bid);
+            $bid->setLot($this);
+        }
+
+        return $this;
+    }
+
+    public function removeBid(Bid $bid): self
+    {
+        if ($this->bids->removeElement($bid)) {
+            // set the owning side to null (unless already changed)
+            if ($bid->getLot() === $this) {
+                $bid->setLot(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function getCurrentBid(): ?int
+    {
+        return $this->currentBid ?? $this->getPriceStart();
+    }
+
+    public function setCurrentBid(?int $currentBid): self
+    {
+        $this->currentBid = $currentBid;
+        return $this;
+    }
+
+    public function getLastBidder(): ?int
+    {
+        return $this->lastBidder;
+    }
+
+    public function setLastBidder(?int $lastBidder): self
+    {
+        $this->lastBidder = $lastBidder;
         return $this;
     }
 }

@@ -32,6 +32,8 @@ class Handler
             ->setPriceStart($command->getPriceStart())
             ->setPriceStep($command->getPriceStep())
             ->setStatus(LotStatus::OPEN)
+            ->setCurrentBid($command->getPriceStart())
+            ->setCreatedAt(new \DateTime())
             ->setBiddingEnd($command->getBiddingEnd());
         return $lot;
     }

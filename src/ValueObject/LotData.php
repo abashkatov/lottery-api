@@ -20,6 +20,8 @@ class LotData
     private \DateTime $biddingEnd;
     /** @var ImageData[] */
     private array $images;
+    private int $currentBid;
+    private \DateTime $createdAt;
 
     /**
      * @param ImageData[] $images
@@ -35,6 +37,8 @@ class LotData
         $this->images      = $images;
         $this->status      = $lot->getStatus()?->value ?? LotStatus::OPEN->value;
         $this->authorId    = $lot->getAuthorId() ?? 0;
+        $this->currentBid  = $lot->getCurrentBid() ?? $lot->getPriceStart();
+        $this->createdAt   = $lot->getCreatedAt();
     }
 
     public function getId(): int
@@ -88,5 +92,15 @@ class LotData
     public function getAuthorId(): int
     {
         return $this->authorId;
+    }
+
+    public function getCurrentBid(): ?int
+    {
+        return $this->currentBid;
+    }
+
+    public function getCreatedAt(): ?\DateTime
+    {
+        return $this->createdAt;
     }
 }
