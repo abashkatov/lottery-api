@@ -19,6 +19,7 @@ use App\Repository\LotRepository;
 use App\ValueObject\LotData;
 use Doctrine\DBAL\Exception;
 use Doctrine\ORM\EntityManagerInterface;
+use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
@@ -35,16 +36,19 @@ class LotController extends AbstractController
     private Serializer             $serializer;
     private EntityManagerInterface $em;
     private LotDataMapper          $lotDataMapper;
+    private LoggerInterface        $analyticsLogger;
 
     public function __construct(
         SerializerInterface $serializer,
         EntityManagerInterface $em,
         LotDataMapper $lotDataMapper,
+        LoggerInterface $analyticsLogger,
     )
     {
         $this->serializer = $serializer;
         $this->em = $em;
         $this->lotDataMapper = $lotDataMapper;
+        $this->analyticsLogger = $analyticsLogger;
     }
 
     /**
@@ -96,10 +100,18 @@ class LotController extends AbstractController
         $userVkId = (int)$request->headers->get('X-VK-ID');
         /** @var CreateLotCommand $command */
         $command = $this->serializer->deserialize($request->getContent(), CreateLotCommand::class, JsonEncoder::FORMAT);
-        $lot = $handler->handle($command);
-        $lot->setAuthorId($userVkId);
+        $lot = $handler->handle($command, $userVkId);
         $this->em->persist($lot);
         $this->em->flush();
+        $this->analyticsLogger->info('create lot', [
+            'user_id' => $userVkId,
+            'lot' => [
+                'id' => $lot->getId(),
+                'price_start' => $lot->getPriceStart(),
+                'price_step' => $lot->getPriceStep(),
+                'title' => $lot->getTitle(),
+            ],
+        ]);
         $lotData = $this->lotDataMapper->buildLotData($lot);
         $data = $this->serializer->normalize($lotData);
         return $this->json($data);

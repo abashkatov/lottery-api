@@ -10,22 +10,26 @@ use App\Repository\BidRepository;
 use App\Service\LotStatusService;
 use Doctrine\DBAL\Exception;
 use Doctrine\ORM\EntityManagerInterface;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class Handler
 {
-    private ValidatorInterface     $validator;
-    private BidRepository          $bidRepository;
-    private LotStatusService       $lotStatusService;
+    private ValidatorInterface $validator;
+    private BidRepository      $bidRepository;
+    private LotStatusService   $lotStatusService;
+    private LoggerInterface    $analyticsLogger;
 
     public function __construct(
         ValidatorInterface $validator,
         BidRepository $bidRepository,
         LotStatusService $lotStatusService,
+        LoggerInterface $analyticsLogger,
     ) {
         $this->validator = $validator;
         $this->bidRepository = $bidRepository;
         $this->lotStatusService = $lotStatusService;
+        $this->analyticsLogger = $analyticsLogger;
     }
 
     /**
@@ -43,6 +47,14 @@ class Handler
         if (count($errors) > 0) {
             throw new InvalidParamsException("Invalid lot params", $errors);
         }
+        $this->analyticsLogger->info('bid', [
+            'user_id' => $command->getUserId(),
+            'bid' => $command->getBid(),
+            'lot' => [
+                'id' => $lot->getId(),
+                'title' => $lot->getTitle(),
+            ],
+        ]);
         return $this->bidRepository->bid($lot, $command);
     }
 }

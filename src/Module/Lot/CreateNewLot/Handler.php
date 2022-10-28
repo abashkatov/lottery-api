@@ -18,7 +18,7 @@ class Handler
         $this->validator = $validator;
     }
 
-    public function handle(Command $command): Lot
+    public function handle(Command $command, int $userId): Lot
     {
         $errors = $this->validator->validate($command);
         if (count($errors) > 0) {
@@ -34,6 +34,7 @@ class Handler
             ->setStatus(LotStatus::OPEN)
             ->setCurrentBid($command->getPriceStart())
             ->setCreatedAt(new \DateTime())
+            ->setAuthorId($userId)
             ->setBiddingEnd($command->getBiddingEnd());
         return $lot;
     }
