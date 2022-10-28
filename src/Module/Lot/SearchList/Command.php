@@ -12,7 +12,6 @@ class Command
     private const ORDERS = ['id', 'priceStart', 'currentBid', 'biddingEnd'];
     private const DEST = ['ASC', 'DESC'];
 
-    #[Assert\GreaterThanOrEqual(0)]
     private int     $offset;
     #[Assert\GreaterThanOrEqual(1)]
     private int     $limit;
@@ -24,6 +23,8 @@ class Command
     private int     $userId;
     #[Assert\Choice(choices: LotStatus::STATUSES)]
     private ?string $status;
+    #[Assert\GreaterThanOrEqual(1)]
+    private int     $page;
 
     public function __construct(int $page, int $limit, ?string $order, ?string $dest, ?string $isMy, ?string $status, int $userId)
     {
@@ -36,6 +37,7 @@ class Command
             : $isMy === 'true';
         $this->userId = $userId;
         $this->status = $status;
+        $this->page = $page;
     }
 
     public function getOffset(): float|int
@@ -71,5 +73,10 @@ class Command
     public function getStatus(): ?string
     {
         return $this->status;
+    }
+
+    public function getPage(): int
+    {
+        return $this->page;
     }
 }
