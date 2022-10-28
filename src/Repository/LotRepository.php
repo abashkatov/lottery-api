@@ -92,6 +92,41 @@ class LotRepository extends ServiceEntityRepository
         }
         return $qb->getQuery()->getResult();
     }
+
+    /**
+     * @throws Exception
+     */
+    public function closeLotsBySales(): int
+    {
+        $sql = <<<SQL
+UPDATE lot SET status = :salesStatus WHERE status = :openStatus AND bidding_end <= now() AND last_bidder IS NOT NULL
+SQL;
+        $stmt = $this->getEntityManager()->getConnection()->prepare($sql);
+        $result = $stmt->executeQuery([
+            'salesStatus' => 'sales',
+            'openStatus' => 'open',
+        ]);
+        $result->fetchAllAssociative();
+        return $result->rowCount();
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function closeLotsByNotSales(): int
+    {
+        $sql = <<<SQL
+UPDATE lot SET status = :closeStatus WHERE status = :openStatus AND bidding_end <= now() AND last_bidder IS NULL
+SQL;
+        $stmt = $this->getEntityManager()->getConnection()->prepare($sql);
+        $result = $stmt->executeQuery([
+            'closeStatus' => 'closed',
+            'openStatus' => 'open',
+        ]);
+        $result->fetchAllAssociative();
+        return $result->rowCount();
+    }
+
 //    /**
 //     * @return Lot[] Returns an array of Lot objects
 //     */
