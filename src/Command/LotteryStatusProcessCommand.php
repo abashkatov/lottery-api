@@ -32,10 +32,12 @@ class LotteryStatusProcessCommand extends Command
         $io = new SymfonyStyle($input, $output);
 
         $sales = $this->lotRepository->closeLotsBySales();
-        $io->success('Successfully completed auctions: ' . $sales);
+        $time = (new \DateTime())->format('c');
+        $io->success("[{$time}] Successfully completed auctions: {$sales}");
 
         $closed = $this->lotRepository->closeLotsByNotSales();
-        $io->success('Completed auctions without a single bid: ' . $closed);
+        $time = (new \DateTime())->format('c');
+        $io->success("[{$time}] Completed auctions without a single bid: {$closed}");
 
         return Command::SUCCESS;
     }
