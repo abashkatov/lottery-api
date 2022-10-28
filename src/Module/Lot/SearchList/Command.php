@@ -9,7 +9,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 class Command
 {
-    private const ORDERS = ['id', 'priceStart'];
+    private const ORDERS = ['id', 'priceStart', 'currentBid', 'biddingEnd'];
     private const DEST = ['ASC', 'DESC'];
 
     #[Assert\GreaterThanOrEqual(0)]
