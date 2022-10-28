@@ -25,8 +25,9 @@ class Command
     private ?string $status;
     #[Assert\GreaterThanOrEqual(1)]
     private int     $page;
+    private bool    $isOnlyBet;
 
-    public function __construct(int $page, int $limit, ?string $order, ?string $dest, ?string $isMy, ?string $status, int $userId)
+    public function __construct(int $page, int $limit, ?string $order, ?string $dest, ?string $isMy, ?string $status, bool $isOnlyBet, int $userId)
     {
         $this->offset = ($page - 1) * $limit;
         $this->limit = $limit;
@@ -38,6 +39,7 @@ class Command
         $this->userId = $userId;
         $this->status = $status;
         $this->page = $page;
+        $this->isOnlyBet = $isOnlyBet;
     }
 
     public function getOffset(): float|int
@@ -78,5 +80,10 @@ class Command
     public function getPage(): int
     {
         return $this->page;
+    }
+
+    public function isOnlyBet(): bool
+    {
+        return $this->isOnlyBet;
     }
 }

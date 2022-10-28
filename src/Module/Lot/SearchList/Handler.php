@@ -38,6 +38,15 @@ class Handler
         if ($command->getStatus() !== null) {
             $criteria['status'] = $command->getStatus();
         }
+        if ($command->isOnlyBet()) {
+            return $this->repository->findByMyBet(
+                $command->getUserId(),
+                $criteria,
+                $orderBy,
+                $command->getLimit(),
+                $command->getOffset()
+            );
+        }
         if ($command->getIsMy() === false) {
             return $this->repository->findByOtherUsers(
                 $command->getUserId(),

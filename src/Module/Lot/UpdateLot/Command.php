@@ -35,6 +35,9 @@ class Command
     #[Assert\Choice(choices: LotStatus::STATUSES)]
     private ?string $status = null;
 
+    #[Assert\Expression("this.isChangeStatusValid()", message: "You cannot change the status of a sold lot")]
+    private ?LotStatus $previousStatus = null;
+
     public function getTitle(): ?string
     {
         return $this->title;
@@ -103,5 +106,26 @@ class Command
     public function setStatus(?string $status): void
     {
         $this->status = $status;
+    }
+
+    public function getPreviousStatus(): ?LotStatus
+    {
+        return $this->previousStatus;
+    }
+
+    public function setPreviousStatus(?LotStatus $previousStatus): void
+    {
+        $this->previousStatus = $previousStatus;
+    }
+
+    public function isChangeStatusValid(): bool
+    {
+        if ($this->status === null) {
+            return true;
+        }
+        if ($this->previousStatus !== LotStatus::SALES) {
+            return true;
+        }
+        return $this->previousStatus->value === $this->status;
     }
 }

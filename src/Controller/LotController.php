@@ -74,6 +74,7 @@ class LotController extends AbstractController
             (string)$request->query->get('dest') ?: null,
             $request->query->get('isMy') ?: null,
             $request->query->get('status') ?: null,
+            $request->query->getBoolean('isOnlyBet') ?? false,
             $userVkId,
         );
         $lots = $handler->handle($command);
@@ -127,6 +128,7 @@ class LotController extends AbstractController
         }
         /** @var UpdateLotCommand $command */
         $command = $this->serializer->deserialize($request->getContent(), UpdateLotCommand::class, JsonEncoder::FORMAT);
+        $command->setPreviousStatus($lot->getStatus());
         $lot = $handler->handle($lot, $command);
         $this->em->flush();
         $lotData = $this->lotDataMapper->buildLotData($lot);

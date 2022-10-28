@@ -2,11 +2,14 @@
 
 namespace App\Repository;
 
+use App\Entity\Bid;
 use App\Entity\Lot;
 use App\ValueObject\LotCounterData;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Common\Collections\Criteria;
 use Doctrine\DBAL\Exception;
+use Doctrine\ORM\Query\Expr\Join;
+use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -59,9 +62,28 @@ class LotRepository extends ServiceEntityRepository
      */
     public function findByOtherUsers(int $userId, array $criteria, array $orderBy = [], ?int $limit = null, ?int $offset = null): array
     {
-        $qb = $this->createQueryBuilder('l')
-            ->andWhere('l.authorId != :userId')
+        $qb = $this->createSearchLotsQueryBuilder($criteria, $orderBy, $limit, $offset);
+        $qb->andWhere('l.authorId != :userId')
             ->setParameter('userId', $userId);
+        return $qb->getQuery()->getResult();
+    }
+
+    /**
+     * @return Lot[] Returns an array of Lot objects
+     */
+    public function findByMyBet(int $userId, array $criteria, array $orderBy = [], ?int $limit = null, ?int $offset = null): array
+    {
+        $qb = $this->createSearchLotsQueryBuilder($criteria, $orderBy, $limit, $offset);
+        $qb->innerJoin('l.bids', 'b')
+            ->andWhere('b.bidderId = :userId')
+            ->setParameter('userId', $userId);
+//        die($qb->getQuery()->getSQL());
+        return $qb->getQuery()->getResult();
+    }
+
+    private function createSearchLotsQueryBuilder(array $criteria, array $orderBy = [], ?int $limit = null, ?int $offset = null): QueryBuilder
+    {
+        $qb = $this->createQueryBuilder('l');
         foreach ($criteria as $key => $value) {
             $qb
                 ->andWhere("l.{$key} = :{$key}")
@@ -90,7 +112,7 @@ class LotRepository extends ServiceEntityRepository
         if (is_int($offset) && $offset > 0) {
             $qb->setFirstResult($offset);
         }
-        return $qb->getQuery()->getResult();
+        return $qb;
     }
 
     /**
