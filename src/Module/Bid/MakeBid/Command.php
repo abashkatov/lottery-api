@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Module\Bid\MakeBid;
 
+use App\Enum\LotStatus;
 use Symfony\Component\Validator\Constraints as Assert;
 
 class Command
@@ -11,6 +12,12 @@ class Command
     #[Assert\NotBlank]
     #[Assert\Expression("this.isBidValid()", message: "The bid must exceed the bidding step")]
     private int $bid;
+
+    #[Assert\Range(minMessage: 'Auction finished', min: '+1 second')]
+    private \DateTime $biddingEndAt;
+
+    #[Assert\IdenticalTo(LotStatus::OPEN, message: "The lot should be open")]
+    private LotStatus $status;
 
     private int $currentBid;
     private int $priceStep;
@@ -59,8 +66,31 @@ class Command
         return $this->userId;
     }
 
-    public function setUserId(int $userId): void
+    public function setUserId(int $userId): self
     {
         $this->userId = $userId;
+        return $this;
+    }
+
+    public function getBiddingEndAt(): \DateTime
+    {
+        return $this->biddingEndAt;
+    }
+
+    public function setBiddingEndAt(\DateTime $biddingEndAt): self
+    {
+        $this->biddingEndAt = $biddingEndAt;
+        return $this;
+    }
+
+    public function getStatus(): LotStatus
+    {
+        return $this->status;
+    }
+
+    public function setStatus(LotStatus $status): self
+    {
+        $this->status = $status;
+        return $this;
     }
 }

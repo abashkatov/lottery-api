@@ -7,7 +7,7 @@ namespace App\Controller;
 use App\Entity\Lot;
 use App\Module\Bid\MakeBid\Command as MakeBidCommand;
 use App\Module\Bid\MakeBid\Handler as MakeBidHandler;
-use App\Repository\LotRepository;
+use Doctrine\DBAL\Exception;
 use http\Exception\InvalidArgumentException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -26,6 +26,10 @@ class BidController extends AbstractController
         $this->serializer = $serializer;
     }
 
+    /**
+     * @throws \Throwable
+     * @throws Exception
+     */
     #[Route('/lots/{lot<\d+>}/bids', name: 'bids-bid', methods: 'POST')]
     public function bid(Request $request, Lot $lot, MakeBidHandler $handler): Response
     {

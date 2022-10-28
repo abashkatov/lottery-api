@@ -51,7 +51,10 @@ class BidRepository extends ServiceEntityRepository
         $this->getEntityManager()->beginTransaction();
         try {
             $sql    = <<<SQL
-UPDATE lot SET current_bid = :newBid, last_bidder = :userId WHERE id = :lotId AND current_bid + price_step <= :newBid
+UPDATE lot SET current_bid = :newBid, last_bidder = :userId 
+           WHERE id = :lotId 
+             AND current_bid + price_step <= :newBid 
+             AND status = 'open'
 SQL;
             $stmt   = $this->getEntityManager()->getConnection()->prepare($sql);
             $result = $stmt->executeQuery([
