@@ -17,14 +17,14 @@
         "symfony/expression-language": "5.4.*",
         "symfony/flex": "^1.17|^2",
         "symfony/framework-bundle": "5.4.*",
+        "symfony/monolog-bundle": "^3.8",
         "symfony/property-access": "5.4.*",
         "symfony/proxy-manager-bridge": "5.4.*",
         "symfony/runtime": "5.4.*",
         "symfony/serializer": "5.4.*",
         "symfony/translation": "5.4.*",
         "symfony/validator": "5.4.*",
-        "symfony/yaml": "5.4.*",
-        "ext-http": "*"
+        "symfony/yaml": "5.4.*"
     },
     "config": {
         "allow-plugins": {
